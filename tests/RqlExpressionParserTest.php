@@ -17,7 +17,7 @@ use PHPUnit\Framework\TestCase;
 
 /**
  * Persvr-style RQL grammar (`eq(foo,3)&lt(price,10)`) -> the SAME RqlQuery AST
- * the classic DSL emits — two parsers, one AST.
+ * the classic DSL emits -- two parsers, one AST.
  */
 final class RqlExpressionParserTest extends TestCase
 {
