@@ -10,7 +10,7 @@ use CoolMS\Rql\Exception\RqlParseException;
  * Parses a Persvr-style RQL expression query string into an immutable
  * {@see RqlQuery} AST — the SECOND front-end parser alongside the
  * `filter=field op value` DSL {@see RqlParser}; both emit the SAME AST, which
- * one recursive translator turns into DQL — "two parsers, one AST".
+ * one recursive translator turns into a query — "two parsers, one AST".
  *
  * Grammar (phase 1 — filters + sort + limit):
  *   query := term ('&' term)*                 (top-level '&' = implicit AND)

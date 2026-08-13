@@ -6,8 +6,8 @@ namespace CoolMS\Rql;
 
 /**
  * Applies an {@see RqlQuery} (filters + sort) to an in-memory row set — the
- * counterpart to the Doctrine translator for file/static/collection sources
- * that aren't backed by a database query.
+ * counterpart to a database translator, for file/static/collection sources
+ * that aren't backed by a query at all.
  *
  * A "row" is an associative array; a {@see FilterNode}'s `field` matches a row
  * key directly (no `extras.` dot-navigation — flatten before calling if a

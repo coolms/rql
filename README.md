@@ -19,8 +19,9 @@ dialect without breaking existing `?filter=` clients:
  &page=1&limit=20                        &limit(20)
 ```
 
-Both parse to the **same** `RqlQuery` value object, which a translator turns
-into portable Doctrine DQL (Postgres / MySQL / SQLite).
+Both parse to the **same** `RqlQuery` value object. Turning that into an actual
+query is your application's job — the AST assumes no ORM, no query builder, and
+no particular database.
 
 - **Zero runtime dependencies** — pure PHP 8.5 value objects, two parsers, and
   interfaces. No framework, no ORM.
@@ -29,11 +30,17 @@ into portable Doctrine DQL (Postgres / MySQL / SQLite).
   context (`RqlContext`); an unlisted field throws, never leaks schema.
 
 > **Scope of this package.** `coolms/rql` is the *pure* layer: the grammar
-> parsers + the AST + the security context + the repository contract. The
-> **Doctrine translator** (`DoctrineRqlVisitor`) and the HTTP-request adapter
-> (`RequestRqlParser`) live in the consuming application,
-> because they depend on Doctrine ORM and Symfony HTTP respectively. This README
-> documents both the package API and how the host wires it end-to-end.
+> parsers, the AST, the security context, and the repository contract. Two
+> pieces are deliberately **not** here, because either one would pull in a
+> dependency and end the zero-dependency promise:
+>
+> - a **translator**, which walks the AST into your query builder;
+> - a **request adapter**, which lifts the query string off an HTTP request.
+>
+> Both are small, and both belong to your application — which already knows
+> which ORM and which HTTP layer it uses, and this package never needs to. The
+> sections below document the package API first, then the contract each of
+> those two pieces has to meet.
 
 ## Installation
 
@@ -47,8 +54,9 @@ Requires PHP `^8.5`.
 
 ## The two grammars
 
-You can use **either** grammar, or both — they emit an identical AST. Pick per
-project; in CoolMS the request adapter auto-selects (see *Choosing a grammar* below).
+You can use **either** grammar, or both — they emit an identical AST. Pick one
+per project, or let a request adapter choose per request (see *Choosing a
+grammar* below).
 
 ### 1. Classic DSL — `field op value`
 
@@ -114,7 +122,8 @@ Both grammars share one operator set ([`FilterOp`](src/FilterOp.php)):
 `notnull`→`nn`. **Null normalisation:** `eq(field,null)` becomes `IS NULL` and
 `ne(field,null)` becomes `IS NOT NULL` (matching the DSL's `null`/`nn`).
 
-`cn`/`bw`/`ew` are **case-insensitive** in the Doctrine translator — it compares
+`cn`/`bw`/`ew` are expected to be **case-insensitive**. The AST carries only the
+operator, so this is part of the translator's contract: compare
 `LOWER(col) LIKE :v` with the bound value already lower-cased.
 
 ## Value literals
@@ -203,17 +212,19 @@ throws [`RqlParseException`](src/Exception/RqlParseException.php) (map to HTTP
 
 ### Choosing a grammar (request adapter)
 
-In CoolMS the host's `RequestRqlParser` reads the raw `QUERY_STRING` and selects
-per request, back-compat-safe:
+A request adapter can read the raw `QUERY_STRING` and pick per request, which is
+back-compat-safe:
 
 - any recognised DSL param (`filter=` / `filter[]=` / `sort=` / `page=` /
   `limit=`) present → **classic** `RqlParser` (every existing client is untouched);
 - otherwise, a query that is purely `name(...)` terms → **Persvr**
   `RqlExpressionParser`.
 
-To do the same in your own app, sniff for a DSL `key=` param and fall back to the
-expression parser; or just standardise on one grammar and call its parser
-directly.
+Sniff for a DSL `key=` param and fall back to the expression parser; or just
+standardise on one grammar and call its parser directly. Reading the raw query
+string rather than a pre-parsed parameter bag matters for the classic DSL,
+because repeated `filter=` terms are the AND syntax and most parameter bags keep
+only the last one.
 
 ---
 
@@ -226,9 +237,9 @@ arbitrary column. [`RqlContext`](src/RqlContext.php) is the whitelist + field-ma
 use CoolMS\Rql\RqlContext;
 
 $ctx = new RqlContext(
-    entityAlias:   'n',                              // Doctrine QB alias
+    entityAlias:   'n',                              // root alias your query uses
     allowedFields: ['title', 'price', 'extras.*'],   // ONLY these may be queried
-    fieldMap:      ['price' => 'n.priceCents'],       // logical name → QB expression
+    fieldMap:      ['price' => 'n.priceCents'],       // logical name → query expression
 );
 ```
 
@@ -240,9 +251,8 @@ $ctx = new RqlContext(
   is rejected.
 - `fieldMap` lets you expose a stable public name over a differently-named column.
 
-A host-side Doctrine translator walks the AST against a
-`Doctrine\ORM\QueryBuilder` and returns a paginated
-[`RqlResult`](src/RqlResult.php):
+Your translator walks the AST against whatever query builder you use and returns
+a paginated [`RqlResult`](src/RqlResult.php):
 
 ```php
 $result = $visitor->apply($query, $queryBuilder, $ctx);
@@ -259,12 +269,12 @@ Implement [`RqlRepositoryInterface`](src/RqlRepositoryInterface.php) on a
 repository to expose `findByRql(RqlQuery, RqlContext): RqlResult` as the standard
 seam.
 
-> **Portability note.** The translator emits portable DQL that runs across
-> Postgres, MySQL, and SQLite. A boolean-group expression builder must be
-> *exhaustive* over every operator — a group builder that returns nothing for
-> some ops would silently drop OR/AND alternatives and mis-filter. Test the
-> translator against a real `EntityManager` (the `QueryBuilder::expr()` factory
-> delegates to the EM), asserting on `getDQL()`.
+> **Writing a translator — the one trap.** The boolean-group branch must be
+> *exhaustive* over every case in `FilterOp`. A group builder that returns
+> nothing for some operators does not error; it silently drops that alternative
+> out of the OR/AND and returns the wrong rows. Assert on the generated query
+> text, not just on the result set — a dropped alternative shows up there as a
+> missing clause, whereas a row count merely looks a little off.
 
 ## Exceptions
 
@@ -283,10 +293,10 @@ All extend `DomainException`; all map to **HTTP 400**.
 
 Full-RQL is landing in phases:
 
-- ✅ Classic DSL parser + AST + portable Doctrine translator.
-- ✅ Persvr function-call grammar (`RqlExpressionParser`), nestable `AndNode`,
-  recursive translator, request-edge grammar selection.
-- ⏳ Projection/`select()`, richer aggregates, and a standalone package test suite.
+- ✅ Classic DSL parser + AST + security context.
+- ✅ Persvr function-call grammar (`RqlExpressionParser`), nestable `AndNode`.
+- ✅ In-memory filter for sources with no query layer at all.
+- ⏳ Projection/`select()` and richer aggregates.
 
 ## License
 

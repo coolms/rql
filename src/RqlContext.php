@@ -11,7 +11,7 @@ use CoolMS\Rql\Exception\RqlSecurityException;
  *
  * Controls:
  *   - Which fields may appear in filter/sort (security whitelist)
- *   - How logical field names map to Doctrine QB expressions
+ *   - How logical field names map to the expressions a query builder understands
  *
  * Filtering and sorting are SEPARATE capabilities and get separate lists:
  * a field can be orderable without being filterable (a computed projection
@@ -30,9 +30,10 @@ use CoolMS\Rql\Exception\RqlSecurityException;
 final readonly class RqlContext
 {
     /**
-     * @param string                $entityAlias      Doctrine QB alias (e.g. 'n', 'node', 'u')
+     * @param string                $entityAlias      root alias the query gives the entity (e.g. 'n', 'node', 'u');
+     *                                                prefixed onto any field the map does not cover
      * @param string[]              $allowedFields    Whitelist of filterable fields (sortable as well)
-     * @param array<string, string> $fieldMap         Logical name → QB expression
+     * @param array<string, string> $fieldMap         Logical name → the expression a query builder understands
      * @param string|null           $dynamicTypeAlias alias of the dynamic type whose JSON extras are
      *                                                filterable, threaded through to platform visitors
      *                                                so they can look up the SQL type declared for a
@@ -77,7 +78,8 @@ final readonly class RqlContext
     }
 
     /**
-     * Resolve a logical field name to its Doctrine QB expression, for filtering.
+     * Resolve a logical field name to the expression a query builder understands,
+     * for filtering.
      *
      * @throws RqlSecurityException when field is not in the whitelist
      */
@@ -88,7 +90,8 @@ final readonly class RqlContext
     }
 
     /**
-     * Resolve a logical field name to its Doctrine QB expression, for sorting.
+     * Resolve a logical field name to the expression a query builder understands,
+     * for sorting.
      *
      * A field the caller may ORDER BY is not necessarily one it may filter on.
      * A grid may declare `sortable` and `filterable` independently, and a
@@ -128,7 +131,9 @@ final readonly class RqlContext
                 throw new RqlSecurityException($field, $purpose);
             }
 
-            return $field; // handled separately by DoctrineJsonVisitor
+            // Returned unmapped on purpose: a JSON path needs the translator to
+            // emit an engine-specific extraction, which this package cannot know.
+            return $field;
         }
 
         // Reject traversal depth > 1 (e.g. a.b.c) — never valid, prevents injection.
@@ -142,7 +147,8 @@ final readonly class RqlContext
         }
 
         // Dot-notation relation traversal (e.g. 'identifiers.value', 'groups.name').
-        // Return the field as-is; DoctrineRqlVisitor builds the correlated EXISTS subquery.
+        // Returned as-is: the translator turns this into a correlated EXISTS
+        // subquery, which needs join metadata this package does not have.
         if (str_contains($field, '.')) {
             return $field;
         }
