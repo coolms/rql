@@ -1,6 +1,7 @@
 # coolms/rql
 
 [![CI](https://github.com/coolms/rql/actions/workflows/ci.yml/badge.svg)](https://github.com/coolms/rql/actions/workflows/ci.yml)
+[![Latest Version](https://img.shields.io/packagist/v/coolms/rql)](https://packagist.org/packages/coolms/rql)
 [![PHP](https://img.shields.io/badge/php-%E2%89%A5%208.5-777bb4)](https://www.php.net/releases/8.5/en.php)
 [![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 
@@ -37,10 +38,14 @@ no particular database.
 > - a **translator**, which walks the AST into your query builder;
 > - a **request adapter**, which lifts the query string off an HTTP request.
 >
-> Both are small, and both belong to your application -- which already knows
-> which ORM and which HTTP layer it uses, and this package never needs to. The
-> sections below document the package API first, then the contract each of
-> those two pieces has to meet.
+> Both belong to your application, which already knows which ORM and which HTTP
+> layer it uses, and this package never needs to.
+>
+> For Doctrine ORM the translator is already written:
+> **[`coolms/rql-doctrine`](https://packagist.org/packages/coolms/rql-doctrine)**,
+> with portable JSON filtering across six database platforms. The sections below
+> document the package API first, then the contract each of those two pieces has
+> to meet, so a translator for another backend has something to build against.
 
 ## Installation
 
