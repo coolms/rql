@@ -2,9 +2,12 @@
 <!--
     Standalone suite for coolms/rql.
 
-    The package is also exercised from the application that consumes it, which mounts this same
-    `tests/` directory as its own `rql` testsuite -- one set of files, run from
-    both places, so the two can never disagree about what passes.
+    The consuming application points its own `rql` testsuite at this same
+    `tests/` directory, so one set of files runs from both places and the two
+    cannot disagree about what passes.
+
+    Note: no double hyphen anywhere in this comment. XML forbids it, and PHPUnit
+    reports it as "Double hyphen within comment" with no file name attached.
 -->
 <phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:noNamespaceSchemaLocation="vendor/phpunit/phpunit/phpunit.xsd"
