@@ -33,9 +33,16 @@ jobs:
         with:
           php-version: ${{ matrix.php }}
           coverage: none
-          # No extensions beyond core: this package has zero runtime
-          # dependencies and must keep proving it.
-          extensions: none, json, mbstring, tokenizer
+          # Deliberately narrow, but NOT a proof of the zero-dependency claim —
+          # that is the separate job below, which installs --no-dev and asserts
+          # vendor/ stays empty. dom/xml/xmlwriter are here because PHPUnit
+          # requires ext-dom to install at all; curl only so Composer does not
+          # fall back to its slow transport.
+          #
+          # The narrowness still earns its keep: src/ is exercised under this
+          # set, so a future dependency on an exotic extension fails here
+          # rather than in someone's application.
+          extensions: none, json, mbstring, tokenizer, dom, xml, xmlwriter, curl, phar
 
       - name: Validate composer.json
         run: composer validate --strict
