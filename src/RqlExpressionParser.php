@@ -8,11 +8,11 @@ use CoolMS\Rql\Exception\RqlParseException;
 
 /**
  * Parses a Persvr-style RQL expression query string into an immutable
- * {@see RqlQuery} AST — the SECOND front-end parser alongside the
+ * {@see RqlQuery} AST -- the SECOND front-end parser alongside the
  * `filter=field op value` DSL {@see RqlParser}; both emit the SAME AST, which
- * one recursive translator turns into a query — "two parsers, one AST".
+ * one recursive translator turns into a query -- "two parsers, one AST".
  *
- * Grammar (phase 1 — filters + sort + limit):
+ * Grammar (phase 1 -- filters + sort + limit):
  *   query := term ('&' term)*                 (top-level '&' = implicit AND)
  *   term  := NAME '(' args ')'
  *   args  := arg (',' arg)*
@@ -88,7 +88,7 @@ final readonly class RqlExpressionParser
     {
         $canonical = strtolower($name);
 
-        // Boolean group: and(...) / or(...) — children are themselves terms.
+        // Boolean group: and(...) / or(...) -- children are themselves terms.
         if ('and' === $canonical || 'or' === $canonical) {
             $children = [];
             foreach ($this->splitTopLevel($argsStr, ',') as $childTerm) {
@@ -116,7 +116,7 @@ final readonly class RqlExpressionParser
             return new FilterNode($field, $op, null);
         }
 
-        // in/ni accept an array — either `in(f,(a,b))` or `in(f,a,b)`.
+        // in/ni accept an array -- either `in(f,(a,b))` or `in(f,a,b)`.
         if (FilterOp::In === $op || FilterOp::Ni === $op) {
             $rest = array_slice($args, 1);
             $first = isset($rest[0]) ? trim($rest[0]) : '';

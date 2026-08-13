@@ -57,7 +57,7 @@ final readonly class RqlContext
     /**
      * Return a copy that resolves `$field` to `$expression` when sorting.
      *
-     * For repositories that ORDER BY a projection they build themselves — a
+     * For repositories that ORDER BY a projection they build themselves -- a
      * correlated `HIDDEN` scalar select, whose alias is valid ONLY in the query
      * that added it. The subquery and the alias it introduces then stay in one
      * place instead of being split between the repository and whoever built the
@@ -136,12 +136,12 @@ final readonly class RqlContext
             return $field;
         }
 
-        // Reject traversal depth > 1 (e.g. a.b.c) — never valid, prevents injection.
+        // Reject traversal depth > 1 (e.g. a.b.c) -- never valid, prevents injection.
         if (substr_count($field, '.') > 1) {
             throw new RqlSecurityException($field, $purpose);
         }
 
-        // Security whitelist — covers both plain and dot-notation relation fields.
+        // Security whitelist -- covers both plain and dot-notation relation fields.
         if (!in_array($field, $allowed, true)) {
             throw new RqlSecurityException($field, $purpose);
         }
@@ -153,7 +153,7 @@ final readonly class RqlContext
             return $field;
         }
 
-        // Plain field — apply transparent mapping or default alias prefix.
+        // Plain field -- apply transparent mapping or default alias prefix.
         return $map[$field] ?? ($this->entityAlias . '.' . $field);
     }
 }

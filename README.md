@@ -4,7 +4,7 @@
 [![PHP](https://img.shields.io/badge/php-%E2%89%A5%208.5-777bb4)](https://www.php.net/releases/8.5/en.php)
 [![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 
-**Resource Query Language for PHP** — parse client-supplied filter/sort/paginate
+**Resource Query Language for PHP** -- parse client-supplied filter/sort/paginate
 query strings into an immutable, type-safe AST, then translate that AST into a
 database query with a field whitelist for safety.
 
@@ -20,13 +20,13 @@ dialect without breaking existing `?filter=` clients:
 ```
 
 Both parse to the **same** `RqlQuery` value object. Turning that into an actual
-query is your application's job — the AST assumes no ORM, no query builder, and
+query is your application's job -- the AST assumes no ORM, no query builder, and
 no particular database.
 
-- **Zero runtime dependencies** — pure PHP 8.5 value objects, two parsers, and
+- **Zero runtime dependencies** -- pure PHP 8.5 value objects, two parsers, and
   interfaces. No framework, no ORM.
-- **Immutable** — every node is a `final readonly` class.
-- **Safe by construction** — fields must be explicitly whitelisted per query
+- **Immutable** -- every node is a `final readonly` class.
+- **Safe by construction** -- fields must be explicitly whitelisted per query
   context (`RqlContext`); an unlisted field throws, never leaks schema.
 
 > **Scope of this package.** `coolms/rql` is the *pure* layer: the grammar
@@ -37,7 +37,7 @@ no particular database.
 > - a **translator**, which walks the AST into your query builder;
 > - a **request adapter**, which lifts the query string off an HTTP request.
 >
-> Both are small, and both belong to your application — which already knows
+> Both are small, and both belong to your application -- which already knows
 > which ORM and which HTTP layer it uses, and this package never needs to. The
 > sections below document the package API first, then the contract each of
 > those two pieces has to meet.
@@ -54,11 +54,11 @@ Requires PHP `^8.5`.
 
 ## The two grammars
 
-You can use **either** grammar, or both — they emit an identical AST. Pick one
+You can use **either** grammar, or both -- they emit an identical AST. Pick one
 per project, or let a request adapter choose per request (see *Choosing a
 grammar* below).
 
-### 1. Classic DSL — `field op value`
+### 1. Classic DSL -- `field op value`
 
 ```
 filter=<field> <op> <value>     # repeat filter= → AND
@@ -72,7 +72,7 @@ filter[]=a op x&filter[]=b op y # PHP array syntax also works
 Parsed by [`RqlParser`](src/RqlParser.php). This is the back-compatible dialect
 used by grid-style query builders.
 
-### 2. Persvr RQL — `op(field, value)`
+### 2. Persvr RQL -- `op(field, value)`
 
 Canonical [RQL](https://github.com/persvr/rql) (a de-facto spec, **not** an IETF
 RFC; FIQL/OData are different dialects and not supported):
@@ -80,7 +80,7 @@ RFC; FIQL/OData are different dialects and not supported):
 ```
 op(field, value)                # eq(price,10)
 &                               # top-level '&' = implicit AND
-and( … ) / or( … )              # boolean groups, arbitrarily nested
+and( ... ) / or( ... )              # boolean groups, arbitrarily nested
 in(field,(a,b)) / in(field,a,b) # both list forms accepted
 sort(-field,+other)             # ± prefix per field
 limit(count) / limit(count,start)
@@ -89,7 +89,7 @@ page(n)
 
 Parsed by [`RqlExpressionParser`](src/RqlExpressionParser.php).
 
-The whole query string *is* the expression — there is no `filter=` wrapper, and
+The whole query string *is* the expression -- there is no `filter=` wrapper, and
 boolean groups nest to any depth:
 
 ```
@@ -146,9 +146,9 @@ Query strings are URL-decoded per term, so
 
 ## Sorting & pagination
 
-- **Sort** — comma/`sort()` list, `-` = DESC, `+` or none = ASC. First field
+- **Sort** -- comma/`sort()` list, `-` = DESC, `+` or none = ASC. First field
   has highest priority.
-- **Pagination** — `page` is 1-based; `limit` is capped at
+- **Pagination** -- `page` is 1-based; `limit` is capped at
   `RqlQuery::MAX_LIMIT` (200) and floored at 1 (default `DEFAULT_LIMIT` = 20).
 - RQL `limit(count, start)` converts a row offset to a 1-based page:
   `limit(20,40)` → `limit=20, page=3`.
@@ -161,7 +161,7 @@ Query strings are URL-decoded per term, so
 
 ```php
 final readonly class RqlQuery {
-    public array $filters;   // array<FilterNode|OrNode|AndNode> — implicit AND
+    public array $filters;   // array<FilterNode|OrNode|AndNode> -- implicit AND
     public array $sort;      // SortNode[]
     public int   $page;      // 1-based
     public int   $limit;     // 1..MAX_LIMIT
@@ -172,13 +172,13 @@ Node types:
 
 | Class                            | Shape                                        |
 |----------------------------------|----------------------------------------------|
-| [`FilterNode`](src/FilterNode.php) | `{ string $field, FilterOp $op, mixed $value }` — one leaf condition. `isJsonField()`/`jsonKey()` detect `extras.*` JSON paths. |
-| [`OrNode`](src/OrNode.php)        | `{ array $nodes }` — OR of children.         |
-| [`AndNode`](src/AndNode.php)      | `{ array $nodes }` — AND of children.         |
+| [`FilterNode`](src/FilterNode.php) | `{ string $field, FilterOp $op, mixed $value }` -- one leaf condition. `isJsonField()`/`jsonKey()` detect `extras.*` JSON paths. |
+| [`OrNode`](src/OrNode.php)        | `{ array $nodes }` -- OR of children.         |
+| [`AndNode`](src/AndNode.php)      | `{ array $nodes }` -- AND of children.         |
 | [`SortNode`](src/SortNode.php)    | `{ string $field, SortDirection $direction }` |
 | [`SortDirection`](src/SortDirection.php) | enum `Asc` / `Desc`                    |
 
-**The AST is arbitrarily nestable** — an `OrNode`/`AndNode` child may itself be
+**The AST is arbitrarily nestable** -- an `OrNode`/`AndNode` child may itself be
 a `FilterNode`, `OrNode`, or `AndNode`. The top-level `RqlQuery::$filters` is an
 implicit AND, so an explicit `AndNode` is only needed *inside* another group.
 
@@ -206,7 +206,7 @@ $q2 = $persvr->parse('gt(price,100)&sort(-createdAt)&limit(20)');
 // $q1 and $q2 are equivalent RqlQuery objects.
 ```
 
-Both parsers are pure and stateless — construct once, reuse. Invalid syntax
+Both parsers are pure and stateless -- construct once, reuse. Invalid syntax
 throws [`RqlParseException`](src/Exception/RqlParseException.php) (map to HTTP
 400).
 
@@ -257,7 +257,7 @@ a paginated [`RqlResult`](src/RqlResult.php):
 ```php
 $result = $visitor->apply($query, $queryBuilder, $ctx);
 
-$result->items;         // array<object> — the page of hydrated entities
+$result->items;         // array<object> -- the page of hydrated entities
 $result->totalItems;    // total matching (COUNT, ignoring pagination)
 $result->page;          // echoed
 $result->limit;         // echoed
@@ -269,11 +269,11 @@ Implement [`RqlRepositoryInterface`](src/RqlRepositoryInterface.php) on a
 repository to expose `findByRql(RqlQuery, RqlContext): RqlResult` as the standard
 seam.
 
-> **Writing a translator — the one trap.** The boolean-group branch must be
+> **Writing a translator -- the one trap.** The boolean-group branch must be
 > *exhaustive* over every case in `FilterOp`. A group builder that returns
 > nothing for some operators does not error; it silently drops that alternative
 > out of the OR/AND and returns the wrong rows. Assert on the generated query
-> text, not just on the result set — a dropped alternative shows up there as a
+> text, not just on the result set -- a dropped alternative shows up there as a
 > missing clause, whereas a row count merely looks a little off.
 
 ## Exceptions

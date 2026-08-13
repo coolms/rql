@@ -3,7 +3,7 @@
     Standalone suite for coolms/rql.
 
     The package is also exercised from the application that consumes it, which mounts this same
-    `tests/` directory as its own `rql` testsuite — one set of files, run from
+    `tests/` directory as its own `rql` testsuite -- one set of files, run from
     both places, so the two can never disagree about what passes.
 -->
 <phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
