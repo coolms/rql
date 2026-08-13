@@ -35,14 +35,18 @@ jobs:
           coverage: none
           # Deliberately narrow, but NOT a proof of the zero-dependency claim —
           # that is the separate job below, which installs --no-dev and asserts
-          # vendor/ stays empty. dom/xml/xmlwriter are here because PHPUnit
-          # requires ext-dom to install at all; curl only so Composer does not
-          # fall back to its slow transport.
+          # vendor/ stays empty.
+          #
+          # Everything through xmlwriter is PHPUnit's own requirement, taken
+          # from its composer.json plus the wider set its bootstrap checks at
+          # runtime (ctype and tokenizer are runtime-only checks and are NOT in
+          # its composer.json — a list built from `require` alone installs
+          # cleanly and then refuses to run). curl and phar are Composer's.
           #
           # The narrowness still earns its keep: src/ is exercised under this
           # set, so a future dependency on an exotic extension fails here
           # rather than in someone's application.
-          extensions: none, json, mbstring, tokenizer, dom, xml, xmlwriter, curl, phar
+          extensions: none, ctype, dom, filter, json, libxml, mbstring, tokenizer, xml, xmlwriter, curl, phar
 
       - name: Validate composer.json
         run: composer validate --strict
