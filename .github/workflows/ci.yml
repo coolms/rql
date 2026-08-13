@@ -4,8 +4,8 @@ on:
   push:
     branches: [main, develop]
   pull_request:
-  # Weekly, so a break caused by a dependency or a PHP point release surfaces
-  # on a quiet Monday rather than inside someone's pull request.
+  # Weekly, so a break from a dependency or a PHP point release shows up on a
+  # Monday rather than inside someone's pull request.
   schedule:
     - cron: '0 6 * * 1'
 
@@ -20,9 +20,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # 8.5 is the floor and it is not negotiable: RqlParser uses the pipe
-        # operator. Add newer versions here as they ship -- never an older one
-        # without first removing that syntax.
+        # 8.5 is the floor: RqlParser uses the pipe operator. Add newer
+        # versions as they ship; don't add an older one without dropping that
+        # syntax first.
         php: ['8.5']
 
     steps:
@@ -33,19 +33,14 @@ jobs:
         with:
           php-version: ${{ matrix.php }}
           coverage: none
-          # Deliberately narrow, but NOT a proof of the zero-dependency claim --
-          # that is the separate job below, which installs --no-dev and asserts
-          # vendor/ stays empty.
+          # Everything up to xmlwriter is PHPUnit's, from its composer.json
+          # plus what its bootstrap checks at runtime -- ctype and tokenizer
+          # are runtime-only, so a list built from `require` alone installs
+          # fine and then refuses to run. curl and phar are Composer's.
           #
-          # Everything through xmlwriter is PHPUnit's own requirement, taken
-          # from its composer.json plus the wider set its bootstrap checks at
-          # runtime (ctype and tokenizer are runtime-only checks and are NOT in
-          # its composer.json -- a list built from `require` alone installs
-          # cleanly and then refuses to run). curl and phar are Composer's.
-          #
-          # The narrowness still earns its keep: src/ is exercised under this
-          # set, so a future dependency on an exotic extension fails here
-          # rather than in someone's application.
+          # Kept narrow so a future dependency on an exotic extension fails
+          # here. It is not what proves the zero-dependency claim; the job
+          # below does that.
           extensions: none, ctype, dom, filter, json, libxml, mbstring, tokenizer, xml, xmlwriter, curl, phar
 
       - name: Validate composer.json
@@ -58,9 +53,8 @@ jobs:
           key: composer-${{ matrix.php }}-${{ hashFiles('composer.json') }}
           restore-keys: composer-${{ matrix.php }}-
 
-      # No composer.lock is committed (this is a library), so this always
-      # resolves fresh -- which is the point: it catches a dependency that
-      # drifts out from under the declared constraints.
+      # No composer.lock here (it's a library), so this resolves fresh every
+      # run and catches a dependency drifting out from under the constraints.
       - name: Install dependencies
         run: composer update --prefer-dist --no-interaction --no-progress
 
@@ -80,19 +74,15 @@ jobs:
           php-version: '8.5'
           coverage: none
 
-      # The README's headline promise. Asserted rather than trusted: install
-      # WITHOUT dev dependencies and fail if anything but the package itself
-      # ends up in vendor/.
+      # Install without dev dependencies and fail if anything lands in
+      # vendor/. The README promises this, so assert it rather than trust it.
       - name: Install runtime dependencies only
         run: composer update --no-dev --prefer-dist --no-interaction --no-progress
 
-      # Warning: Plain text, not `--format=json`. The JSON form needs an
-      # "installed" key, and reading a key that a future composer might rename
-      # would count zero and pass for the wrong reason. With nothing installed
-      # `composer show` prints NOTHING to stdout (its notices go to stderr), so
-      # emptiness here means emptiness. The step also inherits `bash -e`, so a
-      # composer that fails outright fails the job rather than reporting an
-      # empty list.
+      # Plain text, not --format=json: the JSON form needs an "installed" key,
+      # and if composer ever renames it we'd count zero and pass for the wrong
+      # reason. With nothing installed `composer show` prints nothing to
+      # stdout (notices go to stderr), so empty here really means empty.
       - name: Assert nothing was installed
         run: |
           installed=$(composer show --no-dev 2>/dev/null)

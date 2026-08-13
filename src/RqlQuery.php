@@ -7,12 +7,11 @@ namespace CoolMS\Rql;
 /**
  * Immutable value object representing a parsed RQL query.
  *
- * Built by either front-end parser (RqlParser = classic DSL, or
- * RqlExpressionParser = Persvr function-call grammar), then handed to a
- * translator the host supplies -- this package deliberately does not ship one,
- * so nothing here assumes a database, an ORM, or a query language. The
- * top-level $filters array is an implicit AND; entries may be leaf FilterNodes
- * or (nestable) OrNode/AndNode boolean groups.
+ * Built by either front-end parser (RqlParser = classic DSL,
+ * RqlExpressionParser = Persvr function-call grammar) and handed to a
+ * translator the host supplies; this package ships none, so it assumes no
+ * ORM and no query language. The top-level $filters array is an implicit AND;
+ * entries may be leaf FilterNodes or (nestable) OrNode/AndNode groups.
  */
 final readonly class RqlQuery
 {

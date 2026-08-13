@@ -25,10 +25,8 @@ final readonly class RqlMemoryFilter
     #[\NoDiscard('apply() returns the filtered rows; it does not filter in place.')]
     public function apply(array $rows, RqlQuery $query): array
     {
-        // ONE pass, all filters, short-circuiting on the first that rejects.
-        // Filtering per node -- an `array_filter` + `array_values` each -- walked
-        // and rebuilt the whole set once per filter, so three filters meant
-        // three passes and three copies of a set that only shrinks.
+        // One pass, bailing on the first filter that rejects. Was an
+        // array_filter per node, which rebuilt the whole set each time.
         if ([] !== $query->filters) {
             $kept = [];
             foreach ($rows as $row) {
@@ -42,15 +40,9 @@ final readonly class RqlMemoryFilter
             $rows = $kept;
         }
 
-        // ONE sort, comparing keys in priority order. This was a separate `usort`
-        // per key applied in reverse -- correct, since PHP's sort has been stable
-        // since 8.0, but it paid a full n·log n pass for every key.
-        //
-        // Warning: The comparison is INLINE on purpose. Factoring it into a
-        // private `compareBy()` reads better and measured SLOWER than the code
-        // it replaced (35.5ms vs 31.0ms on 5 214 rows): a comparator runs once
-        // per comparison, so a method call per key per comparison outweighed
-        // the whole extra sort pass it saved. Inlined it is 22.9ms.
+        // One usort over all keys in priority order; was one usort per key.
+        // Comparison stays inlined: pulling it into a compareBy() helper cost
+        // a call per key per comparison and measured 35.5ms against 22.9ms.
         if ([] !== $query->sort) {
             usort($rows, function (array $a, array $b) use ($query): int {
                 foreach ($query->sort as $sort) {
@@ -77,11 +69,8 @@ final readonly class RqlMemoryFilter
     /** @param array<string, mixed> $row */
     private function matchesNode(array $row, FilterNode|OrNode|AndNode $node): bool
     {
-        // Warning: Plain loops, deliberately. `array_any`/`array_all` express
-        // this more clearly and were tried here -- they were MEASURABLY SLOWER,
-        // because the callback captures `$row` and so a fresh closure is
-        // allocated on every call, and this runs once per row per node. Reach
-        // for them in cold paths, not in here.
+        // Plain loops, not array_any/array_all: the callback captures $row, so
+        // every call allocates a closure -- and this runs per row per node.
         if ($node instanceof OrNode) {
             foreach ($node->nodes as $child) {
                 if ($this->matchesNode($row, $child)) {

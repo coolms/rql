@@ -11,7 +11,7 @@ use CoolMS\Rql\Exception\RqlSecurityException;
  *
  * Controls:
  *   - Which fields may appear in filter/sort (security whitelist)
- *   - How logical field names map to the expressions a query builder understands
+ *   - How logical field names map to query expressions
  *
  * Filtering and sorting are SEPARATE capabilities and get separate lists:
  * a field can be orderable without being filterable (a computed projection
@@ -30,10 +30,10 @@ use CoolMS\Rql\Exception\RqlSecurityException;
 final readonly class RqlContext
 {
     /**
-     * @param string                $entityAlias      root alias the query gives the entity (e.g. 'n', 'node', 'u');
+     * @param string                $entityAlias      root alias for the entity (e.g. 'n', 'node', 'u'),
      *                                                prefixed onto any field the map does not cover
      * @param string[]              $allowedFields    Whitelist of filterable fields (sortable as well)
-     * @param array<string, string> $fieldMap         Logical name → the expression a query builder understands
+     * @param array<string, string> $fieldMap         Logical name → query expression
      * @param string|null           $dynamicTypeAlias alias of the dynamic type whose JSON extras are
      *                                                filterable, threaded through to platform visitors
      *                                                so they can look up the SQL type declared for a
@@ -78,8 +78,7 @@ final readonly class RqlContext
     }
 
     /**
-     * Resolve a logical field name to the expression a query builder understands,
-     * for filtering.
+     * Resolve a logical field name to its query expression, for filtering.
      *
      * @throws RqlSecurityException when field is not in the whitelist
      */
@@ -90,17 +89,14 @@ final readonly class RqlContext
     }
 
     /**
-     * Resolve a logical field name to the expression a query builder understands,
-     * for sorting.
+     * Resolve a logical field name to its query expression, for sorting.
      *
-     * A field the caller may ORDER BY is not necessarily one it may filter on.
-     * A grid may declare `sortable` and `filterable` independently, and a
-     * computed projection such as a `memberCount` is sortable with no filter
-     * operator at all. Routing sort through {@see resolve} rejected exactly
-     * those columns with a 400 while their header advertised sorting.
+     * A field you may ORDER BY is not necessarily one you may filter on: a
+     * computed projection like `memberCount` has no filter operator at all,
+     * and routing sort through {@see resolve} rejected those with a 400.
      *
-     * `$sortableFields` therefore only ever ADDS: everything filterable stays
-     * sortable, so populating it can never break a query that already worked.
+     * `$sortableFields` only ever ADDS -- everything filterable stays sortable,
+     * so populating it cannot break a query that already worked.
      *
      * @throws RqlSecurityException when the field is in neither whitelist
      */
@@ -131,8 +127,8 @@ final readonly class RqlContext
                 throw new RqlSecurityException($field, $purpose);
             }
 
-            // Returned unmapped on purpose: a JSON path needs the translator to
-            // emit an engine-specific extraction, which this package cannot know.
+            // Left unmapped -- JSON extraction is engine-specific, so the
+            // translator handles it.
             return $field;
         }
 
@@ -147,8 +143,8 @@ final readonly class RqlContext
         }
 
         // Dot-notation relation traversal (e.g. 'identifiers.value', 'groups.name').
-        // Returned as-is: the translator turns this into a correlated EXISTS
-        // subquery, which needs join metadata this package does not have.
+        // Left as-is -- building the EXISTS subquery needs join metadata that
+        // only the translator has.
         if (str_contains($field, '.')) {
             return $field;
         }
