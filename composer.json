@@ -1,6 +1,6 @@
 {
     "name": "coolms/rql",
-    "description": "RQL (Resource Query Language) domain layer — immutable value objects, AST nodes, and interfaces. Zero dependencies.",
+    "description": "RQL (Resource Query Language) domain layer -- immutable value objects, AST nodes, and interfaces. Zero dependencies.",
     "type": "library",
     "license": "MIT",
     "authors": [

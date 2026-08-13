@@ -140,7 +140,7 @@ final class RqlParserTest extends TestCase
     {
         $this->expectException(RqlParseException::class);
         // (void): the call is expected to THROW, so its return is intentionally
-        // discarded — which is exactly what #[NoDiscard] asks callers to say.
+        // discarded -- which is exactly what #[NoDiscard] asks callers to say.
         (void) $this->parser->parse('filter=title xyz "hello"');
     }
 
