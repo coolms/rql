@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace CoolMS\Rql;
 
 use CoolMS\Rql\Exception\RqlSecurityException;
+use NoDiscard;
 
 /**
  * Carries configuration for a specific RQL application context.
@@ -64,7 +65,7 @@ final readonly class RqlContext
      * context. Does NOT widen the whitelist: a field the caller may not sort by
      * is still refused.
      */
-    #[\NoDiscard('withSortAlias() returns a NEW context; the receiver is unchanged.')]
+    #[NoDiscard('withSortAlias() returns a NEW context; the receiver is unchanged.')]
     public function withSortAlias(string $field, string $expression): self
     {
         return new self(
@@ -82,7 +83,7 @@ final readonly class RqlContext
      *
      * @throws RqlSecurityException when field is not in the whitelist
      */
-    #[\NoDiscard()]
+    #[NoDiscard()]
     public function resolve(string $field): string
     {
         return $this->resolveAgainst($field, $this->allowedFields, $this->fieldMap, 'filtering');
@@ -100,7 +101,7 @@ final readonly class RqlContext
      *
      * @throws RqlSecurityException when the field is in neither whitelist
      */
-    #[\NoDiscard()]
+    #[NoDiscard()]
     public function resolveSort(string $field): string
     {
         return $this->resolveAgainst(

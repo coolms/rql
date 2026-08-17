@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace CoolMS\Rql;
 
+use NoDiscard;
+
 /**
  * Paginated query result.
  */
@@ -20,7 +22,7 @@ final readonly class RqlResult
     ) {
     }
 
-    #[\NoDiscard()]
+    #[NoDiscard()]
     public function totalPages(): int
     {
         return $this->limit > 0
@@ -28,7 +30,7 @@ final readonly class RqlResult
             : 1;
     }
 
-    #[\NoDiscard()]
+    #[NoDiscard()]
     public function hasNextPage(): bool
     {
         return $this->page < $this->totalPages();

@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace CoolMS\Rql;
 
+use NoDiscard;
+
 /**
  * Applies an {@see RqlQuery} (filters + sort) to an in-memory row set -- the
  * counterpart to a database translator, for file/static/collection sources
@@ -22,7 +24,7 @@ final readonly class RqlMemoryFilter
      *
      * @return array<array<string, mixed>>
      */
-    #[\NoDiscard('apply() returns the filtered rows; it does not filter in place.')]
+    #[NoDiscard('apply() returns the filtered rows; it does not filter in place.')]
     public function apply(array $rows, RqlQuery $query): array
     {
         // One pass, bailing on the first filter that rejects. Was an

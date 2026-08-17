@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace CoolMS\Rql;
 
 use CoolMS\Rql\Exception\RqlParseException;
+use NoDiscard;
 
 /**
  * Parses a Persvr-style RQL expression query string into an immutable
@@ -35,7 +36,7 @@ final readonly class RqlExpressionParser
         'isnull' => 'null',
     ];
 
-    #[\NoDiscard()]
+    #[NoDiscard()]
     public function parse(string $query): RqlQuery
     {
         $query = trim($query);

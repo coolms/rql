@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace CoolMS\Rql;
 
+use NoDiscard;
+
 /**
  * Immutable value object representing a parsed RQL query.
  *
@@ -31,13 +33,13 @@ final readonly class RqlQuery
     ) {
     }
 
-    #[\NoDiscard()]
+    #[NoDiscard()]
     public function isEmpty(): bool
     {
         return [] === $this->filters && [] === $this->sort;
     }
 
-    #[\NoDiscard()]
+    #[NoDiscard()]
     public function offset(): int
     {
         return ($this->page - 1) * $this->limit;
