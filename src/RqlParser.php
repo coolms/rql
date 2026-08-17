@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace CoolMS\Rql;
 
 use CoolMS\Rql\Exception\RqlParseException;
+use NoDiscard;
 
 /**
  * Parses URL query strings into immutable RqlQuery AST.
@@ -26,7 +27,7 @@ use CoolMS\Rql\Exception\RqlParseException;
  */
 final readonly class RqlParser
 {
-    #[\NoDiscard()]
+    #[NoDiscard()]
     public function parse(string $queryString): RqlQuery
     {
         if ('' === $queryString) {
