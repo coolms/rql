@@ -55,6 +55,17 @@ jobs:
 
       # No composer.lock here (it's a library), so this resolves fresh every
       # run and catches a dependency drifting out from under the constraints.
+      #
+      # ⚠️ There is deliberately no `--prefer-lowest` leg here, and it is not an
+      # oversight -- every other package in this set has one. `require` is
+      # `php: ^8.5` and nothing else, so installing the floor of every range
+      # would install PHPUnit and prove nothing about this package. A matrix
+      # cell that cannot fail for a real reason is worse than a missing one: it
+      # reads as coverage.
+      #
+      # The day this package gains a runtime dependency, the `zero-dependency`
+      # job below goes red -- and whoever fixes that must add the leg here.
+      # That job is the tripwire; this comment is the instruction.
       - name: Install dependencies
         run: composer update --prefer-dist --no-interaction --no-progress
 
