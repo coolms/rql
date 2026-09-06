@@ -34,14 +34,14 @@ final readonly class RqlContext
      * @param string                $entityAlias      root alias for the entity (e.g. 'n', 'node', 'u'),
      *                                                prefixed onto any field the map does not cover
      * @param string[]              $allowedFields    Whitelist of filterable fields (sortable as well)
-     * @param array<string, string> $fieldMap         Logical name → query expression
+     * @param array<string, string> $fieldMap         Logical name -> query expression
      * @param string|null           $dynamicTypeAlias alias of the dynamic type whose JSON extras are
      *                                                filterable, threaded through to platform visitors
      *                                                so they can look up the SQL type declared for a
      *                                                field and emit index-aligned CAST expressions
      * @param string[]              $sortableFields   Fields that are sortable but NOT filterable -- ADDED
      *                                                to `$allowedFields` for ORDER BY, never subtracted
-     * @param array<string, string> $sortFieldMap     Logical name → ORDER BY expression, overlaid on
+     * @param array<string, string> $sortFieldMap     Logical name -> ORDER BY expression, overlaid on
      *                                                `$fieldMap`; carries aliases that exist only in the
      *                                                sorted query (e.g. a `HIDDEN` scalar select)
      */

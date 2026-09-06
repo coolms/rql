@@ -8,8 +8,8 @@ namespace CoolMS\Rql;
  * Sort directive: field + direction.
  *
  * Examples:
- *   sort=createdAt    → SortNode("createdAt", Asc)
- *   sort=-createdAt   → SortNode("createdAt", Desc)
+ *   sort=createdAt    -> SortNode("createdAt", Asc)
+ *   sort=-createdAt   -> SortNode("createdAt", Desc)
  */
 final readonly class SortNode
 {

@@ -22,13 +22,13 @@ use NoDiscard;
  * Comparison ops (map to FilterOp): eq ne lt le gt ge cn(contains) bw ew
  *   in out(=ni) null(field) nn(field). `eq(field,null)`/`ne(field,null)`
  *   normalise to null/nn. Boolean groups: and(...) or(...).
- *   Control: sort(±field,...) limit(count[,start]) page(n).
+ *   Control: sort(+/-field,...) limit(count[,start]) page(n).
  *
  * Value literals (same as the DSL): "quoted" | int | float | true | false | null | bare.
  */
 final readonly class RqlExpressionParser
 {
-    /** @var array<string, string> Operator-name aliases → canonical FilterOp value. */
+    /** @var array<string, string> Operator-name aliases -> canonical FilterOp value. */
     private const array OP_ALIASES = [
         'contains' => 'cn',
         'out' => 'ni',
@@ -172,7 +172,7 @@ final readonly class RqlExpressionParser
     }
 
     /**
-     * `limit(count)` or `limit(count, start)` (start = row offset → 1-based page).
+     * `limit(count)` or `limit(count, start)` (start = row offset -> 1-based page).
      *
      * @return array{int, int} [limit, page]
      */
