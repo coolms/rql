@@ -27,7 +27,7 @@ final class RqlMemoryFilterTest extends TestCase
         ['id' => 4, 'name' => 'Dave', 'age' => 25, 'active' => true],
     ];
 
-    // ── No-op ──────────────────────────────────────────────────────────────────
+    // -- No-op ------------------------------------------------------------------
 
     #[Test]
     public function emptyQueryReturnsAllRows(): void
@@ -36,7 +36,7 @@ final class RqlMemoryFilterTest extends TestCase
         self::assertCount(4, $result);
     }
 
-    // ── Equality filters ───────────────────────────────────────────────────────
+    // -- Equality filters -------------------------------------------------------
 
     #[Test]
     public function eqFilterReturnsMatchingRows(): void
@@ -55,7 +55,7 @@ final class RqlMemoryFilterTest extends TestCase
         self::assertCount(3, $result);
     }
 
-    // ── Comparison filters ─────────────────────────────────────────────────────
+    // -- Comparison filters -----------------------------------------------------
 
     #[Test]
     public function gtFilterReturnsGreaterRows(): void
@@ -93,7 +93,7 @@ final class RqlMemoryFilterTest extends TestCase
         self::assertCount(2, $result);
     }
 
-    // ── String filters ─────────────────────────────────────────────────────────
+    // -- String filters ---------------------------------------------------------
 
     #[Test]
     public function cnFilterMatchesSubstring(): void
@@ -123,7 +123,7 @@ final class RqlMemoryFilterTest extends TestCase
         self::assertCount(2, $result);
     }
 
-    // ── Null / not-null ────────────────────────────────────────────────────────
+    // -- Null / not-null --------------------------------------------------------
 
     #[Test]
     public function nullFilterMatchesNullAndEmptyString(): void
@@ -152,7 +152,7 @@ final class RqlMemoryFilterTest extends TestCase
         self::assertSame('has bio', $result[0]['bio']);
     }
 
-    // ── In / Not-in ────────────────────────────────────────────────────────────
+    // -- In / Not-in ------------------------------------------------------------
 
     #[Test]
     public function inFilterMatchesList(): void
@@ -172,7 +172,7 @@ final class RqlMemoryFilterTest extends TestCase
         self::assertCount(1, $result);
     }
 
-    // ── OR node ────────────────────────────────────────────────────────────────
+    // -- OR node ----------------------------------------------------------------
 
     #[Test]
     public function orNodeMatchesAnyChild(): void
@@ -197,7 +197,7 @@ final class RqlMemoryFilterTest extends TestCase
         self::assertCount(0, $result);
     }
 
-    // ── AND node ───────────────────────────────────────────────────────────────
+    // -- AND node ---------------------------------------------------------------
 
     #[Test]
     public function andNodeMatchesOnlyWhenEveryChildMatches(): void
@@ -227,7 +227,7 @@ final class RqlMemoryFilterTest extends TestCase
         self::assertSame(['Bob', 'Carol'], self::sortedNames($result));
     }
 
-    // ── Multiple filters (AND logic) ───────────────────────────────────────────
+    // -- Multiple filters (AND logic) -------------------------------------------
 
     #[Test]
     public function multipleFiltersAreAndedTogether(): void
@@ -242,7 +242,7 @@ final class RqlMemoryFilterTest extends TestCase
         self::assertSame('Dave', $result[0]['name']);
     }
 
-    // ── Sorting ────────────────────────────────────────────────────────────────
+    // -- Sorting ----------------------------------------------------------------
 
     #[Test]
     public function sortsAscByStringField(): void
@@ -283,7 +283,7 @@ final class RqlMemoryFilterTest extends TestCase
         self::assertSame(['Bob', 'Dave', 'Alice', 'Carol'], $names);
     }
 
-    // ── Filter + sort combined ─────────────────────────────────────────────────
+    // -- Filter + sort combined -------------------------------------------------
 
     #[Test]
     public function filterThenSortWorksTogether(): void
@@ -297,7 +297,7 @@ final class RqlMemoryFilterTest extends TestCase
         self::assertSame(['Dave', 'Carol', 'Alice'], array_column($result, 'name'));
     }
 
-    // ── Empty input ────────────────────────────────────────────────────────────
+    // -- Empty input ------------------------------------------------------------
 
     #[Test]
     public function emptyRowsReturnsEmpty(): void

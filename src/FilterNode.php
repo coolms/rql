@@ -8,10 +8,10 @@ namespace CoolMS\Rql;
  * Single filter condition: field op value.
  *
  * Examples:
- *   title cn "hello"       → FilterNode("title", Cn, "hello")
- *   price gt 100           → FilterNode("price", Gt, 100)
- *   extras.status eq "ok"  → FilterNode("extras.status", Eq, "ok")
- *   parentId null          → FilterNode("parentId", Null, null)
+ *   title cn "hello"       -> FilterNode("title", Cn, "hello")
+ *   price gt 100           -> FilterNode("price", Gt, 100)
+ *   extras.status eq "ok"  -> FilterNode("extras.status", Eq, "ok")
+ *   parentId null          -> FilterNode("parentId", Null, null)
  */
 final readonly class FilterNode
 {
