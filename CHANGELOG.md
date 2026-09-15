@@ -20,6 +20,11 @@ No code changed, so **this will not be released on its own.** It rides out with
 the next change that is worth a version number -- publishing an empty patch to
 ship a documentation file would contradict the policy the file describes.
 
+### Added
+
+Tests the application had been carrying for this package since the code
+moved here: `RqlContextSortTest`. Nothing under `src/` changes.
+
 ## 1.0.0 - 2026-08-13
 
 First release. The RQL domain layer: parser, AST nodes, immutable value objects,
