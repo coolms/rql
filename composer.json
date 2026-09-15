@@ -9,6 +9,10 @@
             "email": "d.popov@altgraphic.com"
         }
     ],
+    "support": {
+        "issues": "https://github.com/coolms/rql/issues",
+        "source": "https://github.com/coolms/rql"
+    },
     "require": {
         "php": "^8.5"
     },
